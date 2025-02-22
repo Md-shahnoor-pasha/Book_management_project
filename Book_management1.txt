@@ -1,0 +1,257 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+class BookNotFoundException extends Exception {
+    public BookNotFoundException(String message) {
+        super(message);
+    }
+}
+
+class Book {
+    private String title;
+    private String author;
+    private double price;
+
+    public Book(String title, String author, double price) {
+        this.title = title;
+        this.author = author;
+        this.price = price;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public void displayBookInfo() {
+        System.out.println("Title: " + title + ", Author: " + author + ", Price: $" + price);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Book book = (Book) obj;
+        return title.equalsIgnoreCase(book.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return title.toLowerCase().hashCode();
+    }
+}
+
+class Library {
+    private ArrayList<Book> books;
+
+    public Library() {
+        books = new ArrayList<>();
+    }
+
+    public void addBook(Book book) {
+        if (books.contains(book)) {
+            System.out.println("This book already exists in the library.");
+        } else {
+            books.add(book);
+            System.out.println("Book added: " + book.getTitle());
+        }
+    }
+
+    public void removeBook(String title) throws BookNotFoundException {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                books.remove(book);
+                System.out.println("Book removed: " + title);
+                return;
+            }
+        }
+        throw new BookNotFoundException("Book not found: " + title);
+    }
+
+    public void searchBook(String title) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                System.out.println("Book Found:");
+                book.displayBookInfo();
+                return;
+            }
+        }
+        System.out.println("Book not found: " + title);
+    }
+
+    public void updateBookPrice(String title, double newPrice) {
+        for (Book book : books) {
+            if (book.getTitle().equalsIgnoreCase(title)) {
+                book.setPrice(newPrice);
+                System.out.println("Updated price of '" + title + "' to $" + newPrice);
+                return;
+            }
+        }
+        System.out.println("Book not found: " + title);
+    }
+
+    public void clearLibrary() {
+        books.clear();
+        System.out.println("All books have been removed from the library.");
+    }
+
+    public void listBooks() {
+        if (books.isEmpty()) {
+            System.out.println("No books available.");
+        } else {
+            for (Book book : books) {
+                book.displayBookInfo();
+            }
+        }
+    }
+}
+
+class User {
+    private String name;
+
+    public User(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addBookToLibrary(Library library, Book book) {
+        library.addBook(book);
+    }
+
+    public void removeBookFromLibrary(Library library, String bookTitle) {
+        try {
+            library.removeBook(bookTitle);
+        } catch (BookNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void searchBookInLibrary(Library library, String bookTitle) {
+        library.searchBook(bookTitle);
+    }
+
+    public void updateBookPrice(Library library, String bookTitle, double newPrice) {
+        library.updateBookPrice(bookTitle, newPrice);
+    }
+
+    public void clearLibrary(Library library) {
+        library.clearLibrary();
+    }
+
+    public void viewBooks(Library library) {
+        library.listBooks();
+    }
+}
+
+public class BookManagementSystem {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Library library = new Library();
+
+        System.out.print("Enter your name: ");
+        String userName = scanner.nextLine();
+        User user = new User(userName);
+
+        while (true) {
+            try {
+                System.out.println("\n--- Book Management System ---");
+                System.out.println("1. Add a book");
+                System.out.println("2. Remove a book");
+                System.out.println("3. View all books");
+                System.out.println("4. Search for a book");
+                System.out.println("5. Update book price");
+                System.out.println("6. Clear all books");
+                System.out.println("7. Exit");
+                System.out.print("Enter your choice: ");
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (choice) {
+                    case 1:
+                        System.out.print("Enter book title: ");
+                        String title = scanner.nextLine();
+                        System.out.print("Enter book author: ");
+                        String author = scanner.nextLine();
+                        System.out.print("Enter book price: ");
+                        double price;
+                        try {
+                            price = Double.parseDouble(scanner.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid price format. Please try again.");
+                            break;
+                        }
+                        Book book = new Book(title, author, price);
+                        user.addBookToLibrary(library, book);
+                        break;
+
+                    case 2:
+                        System.out.print("Enter the title of the book to remove: ");
+                        String bookTitle = scanner.nextLine();
+                        user.removeBookFromLibrary(library, bookTitle);
+                        break;
+
+                    case 3:
+                        System.out.println("\nBooks in Library:");
+                        user.viewBooks(library);
+                        break;
+
+                    case 4:
+                        System.out.print("Enter the title of the book to search: ");
+                        String searchTitle = scanner.nextLine();
+                        user.searchBookInLibrary(library, searchTitle);
+                        break;
+
+                    case 5:
+                        System.out.print("Enter the title of the book to update: ");
+                        String updateTitle = scanner.nextLine();
+                        System.out.print("Enter the new price: ");
+                        double newPrice;
+                        try {
+                            newPrice = Double.parseDouble(scanner.nextLine());
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid price format. Please try again.");
+                            break;
+                        }
+                        user.updateBookPrice(library, updateTitle, newPrice);
+                        break;
+
+                    case 6:
+                        user.clearLibrary(library);
+                        break;
+
+                    case 7:
+                        System.out.println("Exiting the program. Goodbye, " + user.getName() + "!");
+                        scanner.close();
+                        return;
+
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                }
+            } catch (Exception e) {
+                System.out.println("Error: " + e.getMessage());
+            }
+        }
+    }
+}
